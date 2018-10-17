@@ -16,7 +16,7 @@ app.use(methodOverride('_method'));
 app.set('view engine', 'ejs');
 
 // Mongo URI
-const mongoURI = 'mongodb://brad:brad@ds257838.mlab.com:57838/mongouploads';
+const mongoURI = 'mongodb://avi:avivohra1@ds033187.mlab.com:33187/mongofileuploads';
 
 // Create mongo connection
 const conn = mongoose.createConnection(mongoURI);
@@ -26,6 +26,7 @@ let gfs;
 
 conn.once('open', () => {
   // Init stream
+  console.log("connection running")
   gfs = Grid(conn.db, mongoose.mongo);
   gfs.collection('uploads');
 });
@@ -61,8 +62,7 @@ app.get('/', (req, res) => {
     } else {
       files.map(file => {
         if (
-          file.contentType === 'image/jpeg' ||
-          file.contentType === 'image/png'
+          file.contentType === 'application/pdf' || file.contentType === 'image/png'||file.contentType==='image/jpeg'||file.contentType==='image/jpg'||file.contentType==='application/msword'||file.contentType==='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
         ) {
           file.isImage = true;
         } else {
@@ -77,7 +77,8 @@ app.get('/', (req, res) => {
 // @route POST /upload
 // @desc  Uploads file to DB
 app.post('/upload', upload.single('file'), (req, res) => {
-  // res.json({ file: req.file });
+ //  res.json({ file: req.file });
+  console.log(req.body)
   res.redirect('/');
 });
 
@@ -124,9 +125,11 @@ app.get('/image/:filename', (req, res) => {
     }
 
     // Check if image
-    if (file.contentType === 'image/jpeg' || file.contentType === 'image/png') {
+    if (file.contentType === 'application/pdf' || file.contentType === 'image/png'||file.contentType==='image/jpeg'||file.contentType==='image/jpg'||file.contentType==='application/msword'||file.contentType==='application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
       // Read output to browser
       const readstream = gfs.createReadStream(file.filename);
+     // for(const i=0;i<1;i++)
+      console.log("AAAAAA"+readstream);
       readstream.pipe(res);
     } else {
       res.status(404).json({
@@ -147,6 +150,14 @@ app.delete('/files/:id', (req, res) => {
     res.redirect('/');
   });
 });
+// read content
+app.get('read/:filename',(req,res)=>{
+  gfs.files.find({filename:req.params.filename}).toArray((err,file)=>{
+    if(err)
+    console.log(err);
+    else console.log(file);
+  })
+})
 
 const port = 5000;
 
